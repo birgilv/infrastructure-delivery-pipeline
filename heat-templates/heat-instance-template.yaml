@@ -1,0 +1,54 @@
+heat_template_version: 2018-08-31
+
+description: >
+  Heat Template to create an instance with a specified network, subnet,
+  security group, key pair, flavor, and image.
+
+parameters:
+  instance_name:
+    type: string
+    description: Name of the instance
+    default: MyFirstInstance
+
+  network_name:
+    type: string
+    description: Name of the network
+    default: MyInitialNetwork
+
+  security_group_id:
+    type: string
+    description: ID of the security group
+    default: 43ab9733-f17d-4e4b-b96d-51c76f57ad84
+
+  key_name:
+    type: string
+    description: Name of the key pair
+    default: MyNewKey
+
+  flavor:
+    type: string
+    description: Flavor for the instance
+    default: gx2.2c4r
+
+  image:
+    type: string
+    description: Image for the instance
+    default: "Ubuntu Server 20.04 (Focal) amd64 20200424"
+
+resources:
+  instance_port:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: network_name }
+      security_groups:
+        - { get_param: security_group_id }
+
+  instance:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: instance_name }
+      image: { get_param: image }
+      flavor: { get_param: flavor }
+      key_name: { get_param: key_name }
+      networks:
+        - port: { get_resource: instance_port }
